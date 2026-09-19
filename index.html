@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>استوديو الوسائط والسبرايت الشامل | Media & Sprite Studio</title>
+
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#FF3B5C">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3342/3342137.png">
+
+    <!-- الخطوط -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@600;700;800&family=Tajawal:wght@500;700;800&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+
+    <div class="app-container">
+
+        <!-- الشريط العلوي -->
+        <header class="app-header">
+            <div class="header-group export-group" id="headerExportGroup">
+                <button id="exportPNGBtn" class="pill-btn header-pill-btn">
+                    <span>PNG</span>
+                    <span class="red-icon">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="3" stroke-linecap="round">
+                            <path d="M12 5v14M19 12l-7 7-7-7" />
+                        </svg>
+                    </span>
+                </button>
+
+                <button id="exportPDFBtn" class="pill-btn header-pill-btn">
+                    <span>PDF</span>
+                    <span class="red-icon">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="3" stroke-linecap="round">
+                            <path d="M12 5v14M19 12l-7 7-7-7" />
+                        </svg>
+                    </span>
+                </button>
+            </div>
+
+            <div class="tabs-container">
+                <button class="tab-btn active" id="tabCollageBtn">استوديو التجميع</button>
+                <button class="tab-btn" id="tabSpriteBtn">تقطيع السبرايت</button>
+                <button class="tab-btn" id="tabVideoBtn">استخراج من فيديو</button>
+            </div>
+
+            <div class="header-group">
+                <!-- زر تثبيت تطبيق الويندوز (يظهر تلقائياً إذا كان متاحاً) -->
+                <button class="pill-btn install-pwa-btn" id="installPwaBtn" style="display: none;"
+                    title="تثبيت التطبيق على جهازك">
+                    <span>تثبيت التطبيق</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2.5">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />
+                    </svg>
+                </button>
+
+                <div class="icon-btn moon-btn" id="themeToggleBtn" title="تغيير المظهر (ليلي / نهاري)">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-5.4-5.4c0-1.81.89-3.42 2.26-4.4C12.92 3.04 12.46 3 12 3z" />
+                    </svg>
+                </div>
+
+                <div class="icon-btn" id="fullScreenBtn" title="ملء الشاشة">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2.5">
+                        <path
+                            d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+                    </svg>
+                </div>
+            </div>
+        </header>
+
+        <!-- 1. واجهة استوديو التجميع -->
+        <div id="collageView" class="view-section active-view">
+            <main class="main-workspace full-workspace">
+                <section class="canvas-card" id="dropZone">
+                    <input type="file" id="imgUpload" multiple hidden accept="image/*">
+
+                    <div class="empty-placeholder" id="emptyNotice">
+                        <div class="upload-circle">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FF3B5C"
+                                stroke-width="2.5">
+                                <path d="M12 19V5M5 12l7-7 7 7" />
+                            </svg>
+                        </div>
+                        <p>اسحب الصور إلى هنا أو اضغط للاستيراد</p>
+                    </div>
+
+                    <canvas id="previewCanvas"></canvas>
+                </section>
+            </main>
+
+            <footer class="bottom-bar">
+                <button class="pill-btn import-btn" id="collageImportTrigger">
+                    <span>استيراد</span>
+                    <span class="red-circle-icon">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#FFF" stroke-width="3.5">
+                            <path d="M12 19V5M5 12l7-7 7 7" />
+                        </svg>
+                    </span>
+                </button>
+
+                <div class="divider"></div>
+
+                <div class="selection-toolbar">
+                    <button id="clearBtn" class="icon-btn clear-btn" title="مسح الكل">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.2">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
+                            </path>
+                        </svg>
+                    </button>
+
+                    <button id="collageSelectModeBtn" class="icon-btn edit-tool-btn" title="تحديد وحذف صور متعددة">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.2">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
+                            </path>
+                            <line x1="10" y1="11" x2="10" y2="17"></line>
+                            <line x1="14" y1="11" x2="14" y2="17"></line>
+                        </svg>
+                    </button>
+
+                    <div id="collageSelectActions" class="edit-mode-actions" style="display: none;">
+                        <button id="collageDeleteSelectedBtn" class="icon-btn cancel-btn" title="حذف الصور المحددة">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#DC3545"
+                                stroke-width="2.8">
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path
+                                    d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
+                                </path>
+                            </svg>
+                        </button>
+                        <button id="collageCancelSelectBtn" class="icon-btn" title="إلغاء التحديد">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.8">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
+                        <span class="edit-hint-badge" id="collageSelectCountBadge">تم تحديد 0 صور</span>
+                    </div>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="control-group">
+                    <span class="label-text">الحجم</span>
+                    <div class="slider-wrapper">
+                        <input type="range" id="imgSize" min="50" max="1200" value="300" class="custom-slider">
+                    </div>
+                    <div class="input-badge-wrapper">
+                        <input type="number" id="imgSizeNum" min="10" max="3000" value="300"
+                            class="editable-number-input">
+                        <span class="unit-text">px</span>
+                    </div>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="control-group">
+                    <span class="label-text">الأعمدة</span>
+                    <div class="slider-wrapper">
+                        <input type="range" id="columns" min="1" max="12" value="3" class="custom-slider">
+                    </div>
+                    <span class="value-badge" id="columnsVal">3</span>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="control-group">
+                    <span class="label-text">المسافة</span>
+                    <div class="slider-wrapper">
+                        <input type="range" id="imgGap" min="0" max="100" value="12" class="custom-slider">
+                    </div>
+                    <span class="value-badge" id="imgGapVal">12px</span>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="control-group">
+                    <span class="label-text">الحدود</span>
+                    <div class="slider-wrapper">
+                        <input type="range" id="strokeWidth" min="0" max="30" value="0" class="custom-slider">
+                    </div>
+                    <span class="value-badge" id="strokeWidthVal">0px</span>
+                </div>
+
+                <div class="control-group color-group">
+                    <input type="color" id="strokeColor" value="#FF3B5C" class="color-picker-input"
+                        title="اختر لون الحدود">
+                </div>
+
+                <div class="divider"></div>
+                <div class="counter-badge" id="imageCounter">0 صور</div>
+            </footer>
+        </div>
+
+        <!-- 2. واجهة تقطيع السبرايت -->
+        <div id="spriteView" class="view-section">
+            <main class="main-workspace sprite-workspace">
+                <section class="canvas-card sprite-canvas-card" id="spriteDropZone">
+                    <input type="file" id="spriteUpload" hidden accept="image/*">
+
+                    <div class="empty-placeholder" id="spriteEmptyNotice">
+                        <div class="upload-circle">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FF3B5C"
+                                stroke-width="2.5">
+                                <path d="M12 19V5M5 12l7-7 7 7" />
+                            </svg>
+                        </div>
+                        <p>اسحب صورة السبرايت شيت (Sprite Sheet) إلى هنا أو اضغط للاختيار</p>
+                    </div>
+
+                    <div class="sprite-canvas-container" id="spriteCanvasWrapper" style="display: none;">
+                        <canvas id="spriteCanvas"></canvas>
+                    </div>
+                </section>
+
+                <aside class="sprite-preview-panel">
+                    <div class="anim-card">
+                        <span class="panel-title">معاينة الحركة المباشرة</span>
+                        <div class="anim-box">
+                            <canvas id="animCanvas"></canvas>
+                        </div>
+
+                        <div class="anim-controls">
+                            <button id="playPauseBtn" class="pill-btn play-btn" disabled>
+                                <span id="playIcon">► تشغيل</span>
+                            </button>
+                        </div>
+
+                        <div class="control-group vertical">
+                            <span class="label-text">السرعة (<span id="fpsVal">12</span> FPS)</span>
+                            <input type="range" id="fpsInput" min="1" max="60" value="12" class="custom-slider">
+                        </div>
+                    </div>
+
+                    <div class="sprite-actions-bar">
+                        <button id="openPivotEditorBtn" class="icon-btn action-tool-btn"
+                            title="محرر نقطة الارتكاز (Pivot Editor)" disabled>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.3">
+                                <circle cx="12" cy="12" r="9"></circle>
+                                <line x1="12" y1="3" x2="12" y2="7"></line>
+                                <line x1="12" y1="17" x2="12" y2="21"></line>
+                                <line x1="3" y1="12" x2="7" y2="12"></line>
+                                <line x1="17" y1="12" x2="21" y2="12"></line>
+                                <circle cx="12" cy="12" r="2.5" fill="currentColor"></circle>
+                            </svg>
+                        </button>
+
+                        <button id="exportSpriteMp4Btn" class="icon-btn action-tool-btn"
+                            title="تصدير فيديو حركة (MP4/WebM)" disabled>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.3">
+                                <rect x="2" y="4" width="15" height="16" rx="3"></rect>
+                                <path d="M17 9.5l5-3.5v12l-5-3.5v-5z"></path>
+                            </svg>
+                        </button>
+
+                        <button id="exportSpriteGifBtn" class="icon-btn action-tool-btn" title="تصدير صورة متحركة (GIF)"
+                            disabled>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.3">
+                                <rect x="3" y="4" width="18" height="16" rx="3"></rect>
+                                <path d="M7 10h2a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H7v-4z"></path>
+                                <path d="M12 10v4"></path>
+                                <path d="M15 10h3M15 12h2M15 14h1"></path>
+                            </svg>
+                        </button>
+
+                        <button id="exportZipBtn" class="icon-btn action-tool-btn" title="حفظ الإطارات صور منفصلة (ZIP)"
+                            disabled>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.3">
+                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z">
+                                </path>
+                                <line x1="12" y1="11" x2="12" y2="17"></line>
+                                <polyline points="9 14 12 17 15 14"></polyline>
+                            </svg>
+                        </button>
+
+                        <button id="transferToCollageBtn" class="icon-btn action-tool-btn highlight-tool-btn"
+                            title="نقل الإطارات إلى استوديو التجميع" disabled>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.3">
+                                <rect x="3" y="3" width="7" height="7" rx="1"></rect>
+                                <rect x="14" y="3" width="7" height="7" rx="1"></rect>
+                                <rect x="14" y="14" width="7" height="7" rx="1"></rect>
+                                <rect x="3" y="14" width="7" height="7" rx="1"></rect>
+                                <path d="M10 12h4m-2-2l2 2-2 2"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </aside>
+            </main>
+
+            <footer class="bottom-bar">
+                <button class="pill-btn import-btn" id="spriteImportTrigger">
+                    <span>رفع السبرايت</span>
+                </button>
+
+                <div class="divider"></div>
+
+                <div class="sprite-edit-toolbar">
+                    <button id="editSpriteOrderBtn" class="icon-btn edit-tool-btn" title="تعديل وترتيب الإطارات"
+                        disabled>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.2">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                        </svg>
+                    </button>
+
+                    <div id="editModeActions" class="edit-mode-actions" style="display: none;">
+                        <button id="confirmSpriteOrderBtn" class="icon-btn confirm-btn" title="تأكيد الترتيب">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00C853"
+                                stroke-width="2.8">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                        </button>
+                        <button id="cancelSpriteOrderBtn" class="icon-btn cancel-btn" title="إلغاء التعديل">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#DC3545"
+                                stroke-width="2.8">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
+                        <span class="edit-hint-badge">اضغط على صورتين للتبديل بينهما</span>
+                    </div>
+                </div>
+
+                <div class="sprite-delete-toolbar">
+                    <button id="spriteSelectDeleteBtn" class="icon-btn edit-tool-btn" title="تحديد وحذف فريمات"
+                        disabled>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.2">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
+                            </path>
+                            <line x1="10" y1="11" x2="10" y2="17"></line>
+                            <line x1="14" y1="11" x2="14" y2="17"></line>
+                        </svg>
+                    </button>
+
+                    <div id="spriteDeleteActions" class="edit-mode-actions" style="display: none;">
+                        <button id="confirmSpriteDeleteBtn" class="icon-btn cancel-btn" title="حذف الفريمات المحددة">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#DC3545"
+                                stroke-width="2.8">
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path
+                                    d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
+                                </path>
+                            </svg>
+                        </button>
+                        <button id="cancelSpriteDeleteBtn" class="icon-btn" title="إلغاء">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.8">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
+                        <span class="edit-hint-badge" id="spriteDeleteCountBadge">تم تحديد 0 فريم</span>
+                    </div>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="control-group">
+                    <span class="label-text">الأعمدة</span>
+                    <div class="slider-wrapper">
+                        <input type="range" id="spriteCols" min="1" max="30" value="4" class="custom-slider">
+                    </div>
+                    <span class="value-badge" id="spriteColsVal">4</span>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="control-group">
+                    <span class="label-text">الصفوف</span>
+                    <div class="slider-wrapper">
+                        <input type="range" id="spriteRows" min="1" max="30" value="4" class="custom-slider">
+                    </div>
+                    <span class="value-badge" id="spriteRowsVal">4</span>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="counter-badge" id="totalFramesBadge">إجمالي الإطارات: 16</div>
+            </footer>
+        </div>
+
+        <!-- 3. واجهة استخراج الفيديو -->
+        <div id="videoView" class="view-section">
+            <main class="main-workspace video-workspace">
+                <section class="canvas-card video-canvas-card" id="videoDropZone">
+                    <input type="file" id="videoUpload" hidden accept="video/*">
+
+                    <div class="empty-placeholder" id="videoEmptyNotice">
+                        <div class="upload-circle">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FF3B5C"
+                                stroke-width="2.5">
+                                <polygon points="5 3 19 12 5 21 5 3" />
+                            </svg>
+                        </div>
+                        <p>اسحب ملف فيديو إلى هنا أو اضغط للاختيار</p>
+                    </div>
+
+                    <div class="video-preview-wrapper" id="videoPlayerWrapper" style="display: none;">
+                        <video id="mainVideoPlayer" controls playsinline></video>
+                    </div>
+                </section>
+
+                <aside class="sprite-preview-panel">
+                    <div class="anim-card">
+                        <span class="panel-title">معلومات الفيديو</span>
+                        <div class="video-info-list">
+                            <div class="info-item">المدة: <b id="vidDurationBadge">0 ثانية</b></div>
+                            <div class="info-item">الأبعاد: <b id="vidResBadge">0x0</b></div>
+                            <div class="info-item">الإطارات المستهدفة: <b id="vidEstFramesBadge"
+                                    style="color:var(--accent-red);">0 فريم</b></div>
+                        </div>
+                    </div>
+
+                    <div class="action-buttons-group">
+                        <button id="extractGifBtn" class="pill-btn primary-action" disabled>
+                            <span>تصدير كملف (GIF) 🎬</span>
+                        </button>
+
+                        <button id="extractZipBtn" class="pill-btn primary-action" disabled>
+                            <span>تصدير الفريمات (PNG ZIP) 🗂️</span>
+                        </button>
+
+                        <button id="transferVidToCollageBtn" class="pill-btn secondary-action" disabled>
+                            <span>نقل الفريمات للتجميع ➔</span>
+                        </button>
+                    </div>
+                </aside>
+            </main>
+
+            <footer class="bottom-bar">
+                <button class="pill-btn import-btn" id="videoImportTrigger">
+                    <span>رفع فيديو</span>
+                </button>
+
+                <div class="divider"></div>
+
+                <div class="control-group">
+                    <span class="label-text">معدل الفريمات (FPS)</span>
+                    <div class="slider-wrapper">
+                        <input type="range" id="videoFpsInput" min="1" max="30" value="10" class="custom-slider">
+                    </div>
+                    <span class="value-badge" id="videoFpsVal">10 FPS</span>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="control-group">
+                    <span class="label-text">أقصى عدد فريمات</span>
+                    <div class="slider-wrapper">
+                        <input type="range" id="videoMaxFramesInput" min="10" max="250" step="10" value="80"
+                            class="custom-slider">
+                    </div>
+                    <span class="value-badge" id="videoMaxFramesVal">80</span>
+                </div>
+            </footer>
+        </div>
+
+    </div>
+
+    <!-- 4. نافذة محرر نقطة الارتكاز (PIVOT EDITOR) مع التكبير وتصدير JSON -->
+    <div id="pivotEditorModal" class="pivot-modal-overlay">
+        <div class="pivot-modal-container">
+            <header class="pivot-modal-header">
+                <h1 class="pivot-title">PIVOT EDITOR</h1>
+
+                <div class="header-group">
+                    <!-- زر تصدير JSON لمحركات الألعاب -->
+                    <button id="exportPivotJsonBtn" class="pill-btn header-pill-btn"
+                        title="تصدير إحداثيات البيفوت بصيغة JSON لمحركات الألعاب">
+                        <span>تصدير JSON</span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />
+                        </svg>
+                    </button>
+
+                    <span class="zoom-hint">عجلة الماوس: تكبير / تصغير</span>
+                </div>
+            </header>
+
+            <main class="pivot-main-workspace">
+                <div class="pivot-canvas-wrapper" id="pivotCanvasContainer">
+                    <canvas id="pivotCanvas"></canvas>
+
+                    <div class="pivot-bottom-controls">
+                        <div class="pivot-coord-badge">
+                            <span class="coord-label">Y</span>
+                            <input type="number" id="pivotYInput" step="0.01" min="0" max="1" value="0.50"
+                                class="coord-input">
+                        </div>
+
+                        <div class="pivot-coord-badge">
+                            <span class="coord-label">X</span>
+                            <input type="number" id="pivotXInput" step="0.01" min="0" max="1" value="0.50"
+                                class="coord-input">
+                        </div>
+
+                        <button id="toggleOnionSkinBtn" class="icon-btn pivot-tool-btn active-onion"
+                            title="إظهار/إخفاء الفريم السابق واللاحق (Onion Skin)">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <circle cx="12" cy="5" r="3"></circle>
+                                <path d="M12 8v8M8 12l4-2 4 2M9 21l3-5 3 5"></path>
+                            </svg>
+                        </button>
+
+                        <div class="pivot-preset-container">
+                            <button id="openPivotPresetsBtn" class="icon-btn pivot-tool-btn" title="نقاط ارتكاز سريعة">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.5">
+                                    <circle cx="12" cy="12" r="8"></circle>
+                                    <line x1="12" y1="2" x2="12" y2="6"></line>
+                                    <line x1="12" y1="18" x2="12" y2="22"></line>
+                                    <line x1="2" y1="12" x2="6" y2="12"></line>
+                                    <line x1="18" y1="12" x2="22" y2="12"></line>
+                                </svg>
+                            </button>
+
+                            <div id="pivotPresetsPopup" class="pivot-presets-popup" style="display: none;">
+                                <div class="presets-header">Pivot</div>
+                                <div class="presets-grid-3x3">
+                                    <button class="preset-dot" data-x="0.0" data-y="0.0"></button>
+                                    <button class="preset-dot" data-x="0.5" data-y="0.0"></button>
+                                    <button class="preset-dot" data-x="1.0" data-y="0.0"></button>
+                                    <button class="preset-dot" data-x="0.0" data-y="0.5"></button>
+                                    <button class="preset-dot active" data-x="0.5" data-y="0.5"></button>
+                                    <button class="preset-dot" data-x="1.0" data-y="0.5"></button>
+                                    <button class="preset-dot" data-x="0.0" data-y="1.0"></button>
+                                    <button class="preset-dot" data-x="0.5" data-y="1.0"></button>
+                                    <button class="preset-dot" data-x="1.0" data-y="1.0"></button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button id="resetPivotZoomBtn" class="icon-btn pivot-tool-btn"
+                            title="إعادة ضبط حجم العرض (Reset Zoom)">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.2">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                <line x1="11" y1="8" x2="11" y2="14"></line>
+                                <line x1="8" y1="11" x2="14" y2="11"></line>
+                            </svg>
+                        </button>
+
+                        <button id="cancelPivotBtn" class="icon-btn pivot-cancel-btn" title="إلغاء التعديلات">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#DC3545"
+                                stroke-width="2.8">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
+
+                        <button id="savePivotBtn" class="pill-btn pivot-confirm-btn" title="حفظ وتطبيق">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF"
+                                stroke-width="3.2">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="pivot-frames-panel">
+                    <div class="pivot-frames-grid" id="pivotFramesGrid"></div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- شاشة التحميل وشريط التقدم -->
+    <div id="progressContainer">
+        <div class="progress-card">
+            <p id="progressTitle">جاري المعالجة...</p>
+            <div class="progress-bar-bg">
+                <div id="progressBar"></div>
+            </div>
+            <span id="progressText">0%</span>
+        </div>
+    </div>
+
+    <!-- المكتبات الخارجية -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gifshot/0.3.2/gifshot.min.js"></script>
+
+    <!-- كود التطبيق الأساسي بنظام Modules -->
+    <script type="module" src="js/app.js"></script>
+</body>
+
+</html>

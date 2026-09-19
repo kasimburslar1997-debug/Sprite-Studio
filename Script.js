@@ -112,12 +112,16 @@ const dropZone = document.getElementById('dropZone');
 const previewCanvas = document.getElementById('previewCanvas');
 const previewCtx = previewCanvas.getContext('2d');
 const emptyNotice = document.getElementById('emptyNotice');
-const imageCounter = document.getElementById('imageCounter');
+const imageCounterNum = document.getElementById('imageCounterNum');
 
-const imgSizeInput = document.getElementById('imgSize');
 const imgSizeNum = document.getElementById('imgSizeNum');
-const columnsInput = document.getElementById('columns');
-const columnsVal = document.getElementById('columnsVal');
+const sizeDecBtn = document.getElementById('sizeDecBtn');
+const sizeIncBtn = document.getElementById('sizeIncBtn');
+
+const columnsNum = document.getElementById('columnsNum');
+const colsDecBtn = document.getElementById('colsDecBtn');
+const colsIncBtn = document.getElementById('colsIncBtn');
+
 const imgGapInput = document.getElementById('imgGap');
 const imgGapVal = document.getElementById('imgGapVal');
 const strokeWidthInput = document.getElementById('strokeWidth');
@@ -133,6 +137,44 @@ const collageSelectCountBadge = document.getElementById('collageSelectCountBadge
 document.getElementById('collageImportTrigger').addEventListener('click', () => imgUpload.click());
 setupDropZone(dropZone, imgUpload, (files) => handleCollageFiles(files));
 imgUpload.addEventListener('change', (e) => handleCollageFiles(e.target.files));
+
+// التحكم في الحجم (ضرب 2 وتقسيم 2)
+sizeDecBtn.addEventListener('click', () => {
+  let val = parseInt(imgSizeNum.value) || 128;
+  val = Math.max(16, Math.round(val / 2));
+  imgSizeNum.value = val;
+  generateCollagePreview(1);
+});
+
+sizeIncBtn.addEventListener('click', () => {
+  let val = parseInt(imgSizeNum.value) || 128;
+  val = Math.min(4096, Math.round(val * 2));
+  imgSizeNum.value = val;
+  generateCollagePreview(1);
+});
+
+imgSizeNum.addEventListener('input', () => generateCollagePreview(1));
+
+// التحكم في الأعمدة (+1 و -1)
+colsDecBtn.addEventListener('click', () => {
+  let val = parseInt(columnsNum.value) || 5;
+  val = Math.max(1, val - 1);
+  columnsNum.value = val;
+  generateCollagePreview(1);
+});
+
+colsIncBtn.addEventListener('click', () => {
+  let val = parseInt(columnsNum.value) || 5;
+  val = Math.min(30, val + 1);
+  columnsNum.value = val;
+  generateCollagePreview(1);
+});
+
+columnsNum.addEventListener('input', () => generateCollagePreview(1));
+
+imgGapInput.addEventListener('input', (e) => { imgGapVal.textContent = `${e.target.value}px`; generateCollagePreview(1); });
+strokeWidthInput.addEventListener('input', (e) => { strokeWidthVal.textContent = `${e.target.value}px`; generateCollagePreview(1); });
+strokeColorInput.addEventListener('input', () => generateCollagePreview(1));
 
 async function handleCollageFiles(files) {
   if (!files || files.length === 0) return;
@@ -153,13 +195,6 @@ async function handleCollageFiles(files) {
   generateCollagePreview(1);
 }
 
-imgSizeInput.addEventListener('input', (e) => { imgSizeNum.value = e.target.value; generateCollagePreview(1); });
-imgSizeNum.addEventListener('input', (e) => { imgSizeInput.value = parseInt(e.target.value) || 50; generateCollagePreview(1); });
-columnsInput.addEventListener('input', (e) => { columnsVal.textContent = e.target.value; generateCollagePreview(1); });
-imgGapInput.addEventListener('input', (e) => { imgGapVal.textContent = `${e.target.value}px`; generateCollagePreview(1); });
-strokeWidthInput.addEventListener('input', (e) => { strokeWidthVal.textContent = `${e.target.value}px`; generateCollagePreview(1); });
-strokeColorInput.addEventListener('input', () => generateCollagePreview(1));
-
 function updateCollageUIState() {
   if (images.length > 0) {
     emptyNotice.style.display = 'none';
@@ -168,20 +203,52 @@ function updateCollageUIState() {
     emptyNotice.style.display = 'flex';
     previewCanvas.style.display = 'none';
   }
-  imageCounter.textContent = `${images.length} صور`;
+  imageCounterNum.textContent = images.length;
 }
 
-// خوارزمية التجميع المتكيفة (تأخذ الأعمدة الفعلية وتتمدد لملء الحاوية بالكامل)
+// دالة التمدد لملء الحاوية بالكامل حسب العرض أو الارتفاع
+function fitCollageCanvasToContainer() {
+  if (!previewCanvas.width || !previewCanvas.height || images.length === 0) return;
+
+  const padding = 36;
+  const availW = Math.max(50, dropZone.clientWidth - padding);
+  const availH = Math.max(50, dropZone.clientHeight - padding);
+
+  const canvasAspect = previewCanvas.width / previewCanvas.height;
+  const containerAspect = availW / availH;
+
+  let displayW, displayH;
+
+  // إذا كان التجميع أعرض من الحاوية -> ملء العرض
+  if (canvasAspect > containerAspect) {
+    displayW = availW;
+    displayH = availW / canvasAspect;
+  } else {
+    // إذا كان التجميع أطول من الحاوية -> ملء الارتفاع
+    displayH = availH;
+    displayW = availH * canvasAspect;
+  }
+
+  previewCanvas.style.width = `${Math.round(displayW)}px`;
+  previewCanvas.style.height = `${Math.round(displayH)}px`;
+}
+
+// مراقبة حجم الحاوية والتكيف الفوري
+const resizeObserver = new ResizeObserver(() => {
+  fitCollageCanvasToContainer();
+});
+resizeObserver.observe(dropZone);
+
 function generateCollagePreview(quality) {
   if (images.length === 0) {
     previewCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
     return;
   }
 
-  const baseSize = parseInt(imgSizeNum.value) || 300;
-  const userColumns = parseInt(columnsInput.value) || 3;
-  // استخدام الأعمدة الفعلية إذا كان عدد الصور أقل لمنع الفراغات الجانبية
+  const baseSize = parseInt(imgSizeNum.value) || 128;
+  const userColumns = parseInt(columnsNum.value) || 5;
   const columns = Math.min(images.length, userColumns) || 1;
+
   const gap = parseInt(imgGapInput.value) || 0;
   const strokeWidth = parseInt(strokeWidthInput.value) || 0;
   const strokeColor = strokeColorInput.value || '#FF3B5C';
@@ -232,6 +299,8 @@ function generateCollagePreview(quality) {
       previewCtx.strokeRect(pos.x, pos.y, pos.w, pos.h);
     }
   });
+
+  fitCollageCanvasToContainer();
 }
 
 previewCanvas.addEventListener('click', (e) => {
@@ -252,7 +321,7 @@ previewCanvas.addEventListener('click', (e) => {
       break;
     }
   }
-  collageSelectCountBadge.textContent = `تم تحديد ${selectedCollageIndices.size} صور`;
+  collageSelectCountBadge.textContent = `${selectedCollageIndices.size} صور`;
   generateCollagePreview(1);
 });
 
@@ -263,11 +332,12 @@ collageSelectModeBtn.addEventListener('click', () => {
   collageSelectModeBtn.style.display = 'none';
   collageSelectActions.style.display = 'flex';
   previewCanvas.classList.add('selecting');
-  collageSelectCountBadge.textContent = `تم تحديد 0 صور`;
+  collageSelectCountBadge.textContent = `0 صور`;
   generateCollagePreview(1);
 });
 
 collageCancelSelectBtn.addEventListener('click', exitCollageSelectMode);
+
 collageDeleteSelectedBtn.addEventListener('click', () => {
   if (selectedCollageIndices.size > 0) {
     images = images.filter((_, idx) => !selectedCollageIndices.has(idx));
@@ -369,7 +439,6 @@ function loadSpriteFile(file) {
     URL.revokeObjectURL(url);
     spriteImage = img;
     
-    // إظهار الكانفاسات والتأكد من أنها block
     document.getElementById('spriteEmptyNotice').style.display = 'none';
     spriteCanvasWrapper.style.display = 'flex';
     spriteCanvas.style.display = 'block';
@@ -478,7 +547,6 @@ function renderSpriteCanvas() {
     }
   }
 
-  // خطوط الشبكة
   spriteCtx.strokeStyle = '#FF3B5C';
   spriteCtx.lineWidth = 1.5;
   for (let c = 1; c < cols; c++) {

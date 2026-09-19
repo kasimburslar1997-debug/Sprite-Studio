@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>توليد أيقونات التطبيق</title>
+</head>
+<body style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; font-family:sans-serif; background:#EAECEF;">
+  <button id="btn" style="padding:15px 30px; font-size:18px; font-weight:bold; background:#FF3B5C; color:#fff; border:none; border-radius:50px; cursor:pointer;">
+    اضغط هنا لتحميل الأيقونات تلقائياً (192x192 و 512x512)
+  </button>
+
+  <script>
+    function generateIcon(size) {
+      const canvas = document.createElement('canvas');
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext('2d');
+
+      // خلفية دائرية بلون الثيم
+      ctx.fillStyle = '#FF3B5C';
+      ctx.beginPath();
+      ctx.roundRect(0, 0, size, size, size * 0.22);
+      ctx.fill();
+
+      // حرف أو رسم للشعار في المنتصف
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = `bold ${Math.round(size * 0.45)}px sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('MS', size / 2, size / 2 + size * 0.03);
+
+      const a = document.createElement('a');
+      a.download = `icon-${size}.png`;
+      a.href = canvas.toDataURL('image/png');
+      a.click();
+    }
+
+    document.getElementById('btn').addEventListener('click', () => {
+      generateIcon(192);
+      setTimeout(() => generateIcon(512), 400);
+    });
+  </script>
+</body>
+</html>

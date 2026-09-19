@@ -14,7 +14,649 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@600;700;800&family=Tajawal:wght@500;700;800&display=swap" rel="stylesheet">
   
-  <link rel="stylesheet" href="styles.css">
+  <style>
+    :root {
+      --bg-color: #EAECEF;
+      --card-bg: #FFFFFF;
+      --text-main: #2A2D34;
+      --text-muted: #8E95A2;
+      --accent-red: #FF3B5C;
+      --slider-track: #D5D9E0;
+      --canvas-card-bg: #E1E4E8;
+      --shadow-soft: 0 10px 25px rgba(0, 0, 0, 0.03);
+      --shadow-button: 0 4px 12px rgba(0, 0, 0, 0.05);
+      --upload-bg: #FFF0F3;
+      --dragover-bg: #FFF0F5;
+      --radius-xl: 28px;
+      --radius-lg: 20px;
+      --radius-pill: 50px;
+    }
+
+    body.dark-mode {
+      --bg-color: #141619;
+      --card-bg: #1F2227;
+      --text-main: #F0F2F5;
+      --text-muted: #9DA4B0;
+      --slider-track: #323640;
+      --canvas-card-bg: #181A1E;
+      --shadow-soft: 0 10px 25px rgba(0, 0, 0, 0.3);
+      --shadow-button: 0 4px 12px rgba(0, 0, 0, 0.25);
+      --upload-bg: #331D24;
+      --dragover-bg: #441A25;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Comfortaa', 'Tajawal', sans-serif;
+      user-select: none;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 12px;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .app-container {
+      width: 100vw;
+      height: 100vh;
+      max-width: 100%;
+      max-height: 100%;
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 12px;
+      overflow: hidden;
+    }
+
+    .app-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 8px;
+      flex-shrink: 0;
+    }
+
+    .header-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header-pill-btn {
+      padding: 8px 16px;
+      font-size: 13px;
+    }
+
+    .install-pwa-btn {
+      background: var(--accent-red);
+      color: #FFF;
+      animation: bounceInstall 2s infinite;
+    }
+
+    @keyframes bounceInstall {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-3px); }
+    }
+
+    .tabs-container {
+      display: flex;
+      background: var(--card-bg);
+      padding: 4px;
+      border-radius: var(--radius-pill);
+      box-shadow: var(--shadow-button);
+      gap: 4px;
+    }
+
+    .tab-btn {
+      border: none;
+      background: transparent;
+      padding: 8px 20px;
+      border-radius: var(--radius-pill);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn.active {
+      background: var(--accent-red);
+      color: #FFFFFF;
+      box-shadow: 0 4px 12px rgba(255, 59, 92, 0.3);
+    }
+
+    .icon-btn {
+      width: 40px;
+      height: 40px;
+      background: var(--card-bg);
+      border: none;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-main);
+      box-shadow: var(--shadow-button);
+      cursor: pointer;
+      transition: transform 0.2s, background 0.3s, color 0.3s;
+      flex-shrink: 0;
+    }
+
+    .icon-btn:hover:not(:disabled) { transform: scale(1.08); }
+    .icon-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .view-section {
+      display: none;
+      flex: 1;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .view-section.active-view { display: flex; }
+
+    .main-workspace {
+      flex: 1;
+      display: flex;
+      align-items: stretch;
+      gap: 16px;
+      min-height: 0;
+      min-width: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .full-workspace { width: 100%; }
+
+    .pill-btn {
+      background: var(--card-bg);
+      border: none;
+      padding: 10px 18px;
+      border-radius: var(--radius-pill);
+      box-shadow: var(--shadow-button);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-main);
+      cursor: pointer;
+      transition: all 0.2s ease, background 0.3s;
+      flex-shrink: 0;
+    }
+
+    .pill-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+    }
+
+    .pill-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .red-icon { color: var(--accent-red); display: flex; align-items: center; }
+
+    .import-btn-red {
+      background: var(--accent-red) !important;
+      color: #FFFFFF !important;
+      box-shadow: 0 4px 12px rgba(255, 59, 92, 0.35);
+    }
+
+    .broom-btn {
+      background: var(--bg-color);
+      color: var(--text-main);
+    }
+    .broom-btn:hover {
+      background: var(--upload-bg);
+      color: var(--accent-red);
+    }
+
+    .counter-badge {
+      background: var(--card-bg);
+      padding: 8px 14px;
+      border-radius: var(--radius-pill);
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      box-shadow: var(--shadow-button);
+      white-space: nowrap;
+    }
+
+    .counter-minimal {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .canvas-card {
+      flex: 1;
+      width: 100%;
+      height: 100%;
+      min-width: 0;
+      min-height: 0;
+      background: var(--canvas-card-bg);
+      border-radius: var(--radius-xl);
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      padding: 16px;
+      border: 3px dashed transparent;
+      transition: border-color 0.2s, background-color 0.2s;
+      cursor: pointer;
+    }
+
+    .canvas-card.drag-over {
+      border-color: var(--accent-red);
+      background: var(--dragover-bg);
+    }
+
+    .empty-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    .upload-circle {
+      width: 60px;
+      height: 60px;
+      background: var(--upload-bg);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #previewCanvas {
+      display: none;
+      border-radius: 14px;
+      background-color: #FFFFFF;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      image-rendering: pixelated;
+      image-rendering: -moz-crisp-edges;
+      image-rendering: crisp-edges;
+      transition: width 0.1s ease, height 0.1s ease;
+    }
+
+    #previewCanvas.selecting {
+      cursor: crosshair;
+      box-shadow: 0 0 0 3.5px #FF3B5C;
+    }
+
+    .sprite-canvas-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    #spriteCanvas {
+      max-width: 100%;
+      max-height: 100%;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      border-radius: 14px;
+      background-color: #FFFFFF;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      display: block;
+      image-rendering: pixelated;
+    }
+
+    .sprite-canvas-container.editing #spriteCanvas {
+      cursor: pointer;
+      box-shadow: 0 0 0 3px #00C853;
+    }
+
+    .sprite-canvas-container.deleting #spriteCanvas {
+      cursor: pointer;
+      box-shadow: 0 0 0 3px #FF3B5C;
+    }
+
+    .sprite-preview-panel {
+      width: 340px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    .anim-card {
+      background: var(--card-bg);
+      padding: 16px;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-soft);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+    }
+
+    .panel-title { font-size: 14px; font-weight: 800; color: var(--text-main); }
+    .anim-box {
+      width: 100%;
+      flex: 1;
+      min-height: 180px;
+      background: var(--bg-color);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
+    }
+
+    #animCanvas {
+      width: 100%;
+      height: 100%;
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      display: block;
+      image-rendering: pixelated;
+    }
+
+    .anim-controls { width: 100%; display: flex; justify-content: center; }
+    .anim-controls .play-btn { width: 100%; max-width: 200px; }
+    .control-group.vertical { flex-direction: column; width: 100%; gap: 6px; align-items: center; }
+
+    .sprite-actions-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-evenly;
+      gap: 8px;
+      background: var(--card-bg);
+      padding: 10px 14px;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .action-tool-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: var(--bg-color);
+      color: var(--text-main);
+    }
+
+    .action-tool-btn:hover:not(:disabled) {
+      background: var(--accent-red);
+      color: #FFF;
+      transform: translateY(-2px);
+    }
+
+    .highlight-tool-btn { color: var(--accent-red); border: 1.5px solid rgba(255, 59, 92, 0.4); }
+
+    .selection-toolbar, .sprite-edit-toolbar, .sprite-delete-toolbar, .edit-mode-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .edit-tool-btn { background: var(--bg-color); color: var(--text-main); }
+    .edit-tool-btn:hover:not(:disabled) { background: var(--accent-red); color: #FFF; }
+    .confirm-btn { background: #E8F5E9; border: 1.5px solid #00C853; }
+    .cancel-btn { background: #FFEBEE; border: 1.5px solid #DC3545; }
+
+    .edit-hint-badge {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent-red);
+      background: var(--bg-color);
+      padding: 6px 12px;
+      border-radius: var(--radius-pill);
+      white-space: nowrap;
+    }
+
+    /* حقول الزيادة والنقصان */
+    .stepper-pill {
+      display: inline-flex;
+      align-items: center;
+      background: var(--bg-color);
+      border-radius: var(--radius-pill);
+      padding: 3px 6px;
+      gap: 4px;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .stepper-btn {
+      width: 22px;
+      height: 22px;
+      border: none;
+      background: transparent;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: all 0.2s ease;
+    }
+
+    .stepper-btn:hover {
+      background: rgba(0, 0, 0, 0.08);
+      color: var(--accent-red);
+      transform: scale(1.15);
+    }
+
+    body.dark-mode .stepper-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .stepper-input {
+      width: 44px;
+      border: none;
+      background: transparent;
+      outline: none;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--accent-red);
+      font-family: inherit;
+      -moz-appearance: textfield;
+    }
+
+    .stepper-input::-webkit-outer-spin-button,
+    .stepper-input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    .video-preview-wrapper {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #mainVideoPlayer { max-width: 100%; max-height: 100%; border-radius: var(--radius-lg); background: #000; }
+    .video-info-list { display: flex; flex-direction: column; gap: 8px; width: 100%; font-size: 13px; }
+    .video-info-list .info-item {
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px dashed var(--slider-track);
+      padding-bottom: 4px;
+    }
+
+    .action-buttons-group { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+    .primary-action { background: var(--accent-red); color: #FFF; }
+    .secondary-action { background: var(--card-bg); border: 1.5px solid var(--accent-red); color: var(--accent-red); }
+
+    .bottom-bar {
+      background: var(--card-bg);
+      padding: 10px 24px;
+      border-radius: var(--radius-pill);
+      box-shadow: var(--shadow-soft);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      width: fit-content;
+      max-width: 100%;
+      margin: 0 auto;
+      flex-wrap: wrap;
+      flex-shrink: 0;
+    }
+
+    .control-group { display: flex; align-items: center; gap: 10px; }
+    .label-text { font-size: 13px; font-weight: 700; color: var(--text-main); white-space: nowrap; }
+    .value-badge { font-size: 12px; font-weight: 700; color: var(--text-muted); min-width: 30px; }
+    .color-picker-input { -webkit-appearance: none; border: none; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; background: none; }
+    .divider { width: 2px; height: 18px; background-color: var(--bg-color); }
+    .custom-slider { -webkit-appearance: none; width: 90px; height: 6px; border-radius: 10px; background: var(--slider-track); outline: none; }
+    .custom-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--accent-red); cursor: pointer; }
+
+    /* محرر البيفوت */
+    .pivot-modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: var(--bg-color);
+      z-index: 2000;
+      padding: 16px;
+    }
+
+    .pivot-modal-overlay.active { display: flex; flex-direction: column; }
+    .pivot-modal-container { width: 100%; height: 100%; display: flex; flex-direction: column; gap: 12px; }
+    .pivot-modal-header { display: flex; align-items: center; justify-content: space-between; padding: 0 8px; }
+    .pivot-title { font-size: 24px; font-weight: 800; color: var(--text-main); }
+    .zoom-hint { font-size: 12px; color: var(--text-muted); font-weight: 700; }
+    .pivot-main-workspace { flex: 1; display: flex; gap: 16px; min-height: 0; }
+
+    .pivot-canvas-wrapper {
+      flex: 1;
+      background: #FFF;
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-soft);
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      cursor: crosshair;
+    }
+
+    body.dark-mode .pivot-canvas-wrapper { background: var(--card-bg); }
+
+    #pivotCanvas {
+      max-width: none;
+      max-height: none;
+      display: block;
+      image-rendering: pixelated;
+      transition: transform 0.05s linear;
+    }
+
+    .pivot-bottom-controls {
+      position: absolute;
+      bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 10;
+      background: var(--card-bg);
+      padding: 8px 14px;
+      border-radius: var(--radius-pill);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .pivot-coord-badge { background: var(--bg-color); padding: 6px 10px; border-radius: var(--radius-pill); display: flex; align-items: center; gap: 6px; }
+    .coord-label { font-weight: 800; font-size: 13px; color: var(--accent-red); }
+    .coord-input { width: 44px; background: transparent; border: none; outline: none; font-size: 13px; font-weight: 700; color: var(--text-main); text-align: center; }
+    .pivot-tool-btn.active-onion { background: var(--upload-bg); color: var(--accent-red); }
+
+    .pivot-presets-popup {
+      position: absolute;
+      bottom: 50px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--card-bg);
+      padding: 12px;
+      border-radius: var(--radius-lg);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .presets-grid-3x3 { display: grid; grid-template-columns: repeat(3, 22px); gap: 6px; }
+    .preset-dot { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--slider-track); background: transparent; cursor: pointer; }
+    .preset-dot.active { background: var(--accent-red); border-color: var(--accent-red); }
+
+    .pivot-frames-panel { width: 380px; height: 100%; background: var(--card-bg); border-radius: var(--radius-xl); padding: 14px; overflow-y: auto; }
+    .pivot-frames-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .pivot-frame-thumb-card {
+      position: relative;
+      aspect-ratio: 1 / 1;
+      background: var(--bg-color);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      overflow: hidden;
+      border: 2px solid transparent;
+    }
+    .pivot-frame-thumb-card.active-thumb { border-color: var(--accent-red); }
+    .pivot-frame-thumb-card canvas { max-width: 90%; max-height: 90%; image-rendering: pixelated; }
+    .thumb-number { position: absolute; bottom: 2px; left: 6px; font-size: 11px; font-weight: 800; color: var(--text-main); }
+
+    #progressContainer {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(4px);
+      z-index: 3000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .progress-card { background: var(--card-bg); padding: 24px; border-radius: var(--radius-lg); text-align: center; width: 280px; display: flex; flex-direction: column; gap: 12px; }
+    .progress-bar-bg { width: 100%; height: 8px; background: var(--slider-track); border-radius: 8px; overflow: hidden; }
+    #progressBar { width: 0%; height: 100%; background: var(--accent-red); transition: width 0.2s ease; }
+    #progressText { font-weight: 700; color: var(--accent-red); font-size: 13px; }
+
+    @media (max-width: 950px) {
+      html, body { overflow: auto; }
+      .app-container { height: auto; min-height: 100vh; }
+      .main-workspace { flex-direction: column; }
+      .sprite-preview-panel { width: 100%; max-width: 100%; }
+      .pivot-main-workspace { flex-direction: column; }
+      .pivot-frames-panel { width: 100%; height: 260px; }
+    }
+  </style>
 </head>
 <body>
 
@@ -77,9 +719,7 @@
         </section>
       </main>
 
-      <!-- الشريط السفلي لاستوديو التجميع -->
       <footer class="bottom-bar">
-        <!-- زر استيراد أحمر -->
         <button class="pill-btn import-btn-red" id="collageImportTrigger">
           <span>استيراد</span>
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
@@ -87,7 +727,6 @@
           </svg>
         </button>
 
-        <!-- زر مسح الكل بأيقونة المكنسة -->
         <button id="clearBtn" class="icon-btn broom-btn" title="مسح الكل">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M17 3l4 4L9 19l-4 1 1-4L17 3z"/>
@@ -96,7 +735,6 @@
           </svg>
         </button>
 
-        <!-- زر سلة المهملات للتحديد والحذف -->
         <div class="selection-toolbar">
           <button id="collageSelectModeBtn" class="icon-btn edit-tool-btn" title="تحديد وحذف صور متعددة">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -118,7 +756,6 @@
 
         <div class="divider"></div>
 
-        <!-- قسم الحجم (×2 و ÷2) -->
         <div class="control-group">
           <span class="label-text">الحجم</span>
           <div class="stepper-pill" dir="ltr">
@@ -134,7 +771,6 @@
 
         <div class="divider"></div>
 
-        <!-- قسم الأعمدة (+1 و -1) -->
         <div class="control-group">
           <span class="label-text">الأعمدة</span>
           <div class="stepper-pill" dir="ltr">
@@ -150,7 +786,6 @@
 
         <div class="divider"></div>
 
-        <!-- قسم المسافة -->
         <div class="control-group">
           <span class="label-text">المسافة</span>
           <div class="slider-wrapper">
@@ -161,7 +796,6 @@
 
         <div class="divider"></div>
 
-        <!-- قسم الحدود -->
         <div class="control-group">
           <span class="label-text">الحدود</span>
           <div class="slider-wrapper">
@@ -176,8 +810,7 @@
 
         <div class="divider"></div>
 
-        <!-- قسم عدد الصور المقتضب (رقم + أيقونة) -->
-        <div class="counter-badge counter-minimal" id="imageCounter" title="إجمالي الصور المجمعة">
+        <div class="counter-badge counter-minimal" id="imageCounter" title="إجمالي الصور">
           <span id="imageCounterNum">0</span>
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#FF3B5C" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="3" y="3" width="18" height="18" rx="3" ry="3"></rect>
@@ -387,7 +1020,7 @@
 
   </div>
 
-  <!-- 4. نافذة محرر البيفوت مع التكبير وتصدير JSON -->
+  <!-- محرر البيفوت -->
   <div id="pivotEditorModal" class="pivot-modal-overlay">
     <div class="pivot-modal-container">
       <header class="pivot-modal-header">
@@ -398,7 +1031,6 @@
             <span>تصدير JSON</span>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
           </button>
-          
           <span class="zoom-hint">عجلة الفأرة: تكبير وتصغير</span>
         </div>
       </header>
@@ -418,7 +1050,7 @@
               <input type="number" id="pivotXInput" step="0.01" min="0" max="1" value="0.50" class="coord-input">
             </div>
 
-            <button id="toggleOnionSkinBtn" class="icon-btn pivot-tool-btn active-onion" title="إظهار/إخفاء الفريم السابق واللاحق (Onion Skin)">
+            <button id="toggleOnionSkinBtn" class="icon-btn pivot-tool-btn active-onion" title="إظهار/إخفاء الفريم السابق واللاحق">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="3"></circle><path d="M12 8v8M8 12l4-2 4 2M9 21l3-5 3 5"></path></svg>
             </button>
 
@@ -443,15 +1075,15 @@
               </div>
             </div>
 
-            <button id="resetPivotZoomBtn" class="icon-btn pivot-tool-btn" title="إعادة ضبط حجم العرض (Reset Zoom)">
+            <button id="resetPivotZoomBtn" class="icon-btn pivot-tool-btn" title="إعادة ضبط الحجم">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
             </button>
 
-            <button id="cancelPivotBtn" class="icon-btn pivot-cancel-btn" title="إلغاء التعديلات">
+            <button id="cancelPivotBtn" class="icon-btn pivot-cancel-btn" title="إلغاء">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#DC3545" stroke-width="2.8"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
             </button>
 
-            <button id="savePivotBtn" class="pill-btn pivot-confirm-btn" title="حفظ وتطبيق">
+            <button id="savePivotBtn" class="pill-btn pivot-confirm-btn" title="حفظ">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3.2"><polyline points="20 6 9 17 4 12"></polyline></svg>
             </button>
           </div>
@@ -464,7 +1096,7 @@
     </div>
   </div>
 
-  <!-- شاشة التحميل وشريط التقدم -->
+  <!-- شاشة التحميل -->
   <div id="progressContainer">
     <div class="progress-card">
       <p id="progressTitle">جاري المعالجة...</p>
@@ -475,12 +1107,1283 @@
     </div>
   </div>
 
-  <!-- المكتبات الخارجية -->
+  <!-- مكتبات التصدير الخارجية -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gifshot/0.3.2/gifshot.min.js"></script>
 
-  <!-- ملف السكربت النهائي الموحد -->
-  <script src="script.js"></script>
+  <!-- كود الجافاسكريبت مدمج مباشرة ومحمي من أي انقطاع -->
+  <script>
+    // ==========================================
+    // 1. إدارة PWA والواجهة العامة
+    // ==========================================
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
+      });
+    }
+
+    let deferredPrompt = null;
+    const installPwaBtn = document.getElementById('installPwaBtn');
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      if (installPwaBtn) installPwaBtn.style.display = 'flex';
+    });
+
+    if (installPwaBtn) {
+      installPwaBtn.addEventListener('click', async () => {
+        if (!deferredPrompt) return;
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') installPwaBtn.style.display = 'none';
+        deferredPrompt = null;
+      });
+    }
+
+    function showProgress(title) {
+      document.getElementById('progressTitle').textContent = title;
+      document.getElementById('progressBar').style.width = '0%';
+      document.getElementById('progressText').textContent = '0%';
+      document.getElementById('progressContainer').style.display = 'flex';
+    }
+
+    function updateProgress(percent) {
+      document.getElementById('progressBar').style.width = `${percent}%`;
+      document.getElementById('progressText').textContent = `${percent}%`;
+    }
+
+    function hideProgress() {
+      setTimeout(() => {
+        document.getElementById('progressContainer').style.display = 'none';
+      }, 400);
+    }
+
+    // دالة السحب والإفلات مع حماية كاملة من حلقة النقر اللا نهائية
+    function setupDropZone(dropZoneElem, inputElem, onFiles) {
+      inputElem.addEventListener('click', (e) => e.stopPropagation());
+
+      dropZoneElem.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZoneElem.classList.add('drag-over');
+      });
+      dropZoneElem.addEventListener('dragleave', (e) => {
+        if (!dropZoneElem.contains(e.relatedTarget)) {
+          dropZoneElem.classList.remove('drag-over');
+        }
+      });
+      dropZoneElem.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZoneElem.classList.remove('drag-over');
+        if (e.dataTransfer && e.dataTransfer.files.length > 0) {
+          onFiles(e.dataTransfer.files);
+        }
+      });
+      dropZoneElem.addEventListener('click', (e) => {
+        if (e.target === inputElem) return;
+        if (e.target.tagName !== 'CANVAS' && e.target.tagName !== 'VIDEO') {
+          inputElem.click();
+        }
+      });
+    }
+
+    const tabCollageBtn = document.getElementById('tabCollageBtn');
+    const tabSpriteBtn = document.getElementById('tabSpriteBtn');
+    const tabVideoBtn = document.getElementById('tabVideoBtn');
+    const collageView = document.getElementById('collageView');
+    const spriteView = document.getElementById('spriteView');
+    const videoView = document.getElementById('videoView');
+    const headerExportGroup = document.getElementById('headerExportGroup');
+
+    function switchTab(activeBtn, activeView) {
+      [tabCollageBtn, tabSpriteBtn, tabVideoBtn].forEach(b => b.classList.remove('active'));
+      [collageView, spriteView, videoView].forEach(v => v.classList.remove('active-view'));
+      activeBtn.classList.add('active');
+      activeView.classList.add('active-view');
+      if (headerExportGroup) {
+        headerExportGroup.style.visibility = (activeView === collageView) ? 'visible' : 'hidden';
+      }
+      if (activeView === collageView) {
+        fitCollageCanvasToContainer();
+      }
+    }
+
+    tabCollageBtn.addEventListener('click', () => switchTab(tabCollageBtn, collageView));
+    tabSpriteBtn.addEventListener('click', () => switchTab(tabSpriteBtn, spriteView));
+    tabVideoBtn.addEventListener('click', () => switchTab(tabVideoBtn, videoView));
+
+    const themeToggleBtn = document.getElementById('themeToggleBtn');
+    if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode');
+    themeToggleBtn.addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+      localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+    });
+
+    document.getElementById('fullScreenBtn').addEventListener('click', () => {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {});
+      else document.exitFullscreen().catch(() => {});
+    });
+
+    // ==========================================
+    // 2. استوديو التجميع (Collage Studio)
+    // ==========================================
+    let images = [];
+    let isCollageSelectMode = false;
+    let selectedCollageIndices = new Set();
+    let collagePositions = [];
+
+    const imgUpload = document.getElementById('imgUpload');
+    const dropZone = document.getElementById('dropZone');
+    const previewCanvas = document.getElementById('previewCanvas');
+    const previewCtx = previewCanvas.getContext('2d');
+    const emptyNotice = document.getElementById('emptyNotice');
+    const imageCounterNum = document.getElementById('imageCounterNum');
+
+    const imgSizeNum = document.getElementById('imgSizeNum');
+    const sizeDecBtn = document.getElementById('sizeDecBtn');
+    const sizeIncBtn = document.getElementById('sizeIncBtn');
+
+    const columnsNum = document.getElementById('columnsNum');
+    const colsDecBtn = document.getElementById('colsDecBtn');
+    const colsIncBtn = document.getElementById('colsIncBtn');
+
+    const imgGapInput = document.getElementById('imgGap');
+    const imgGapVal = document.getElementById('imgGapVal');
+    const strokeWidthInput = document.getElementById('strokeWidth');
+    const strokeWidthVal = document.getElementById('strokeWidthVal');
+    const strokeColorInput = document.getElementById('strokeColor');
+
+    const collageSelectModeBtn = document.getElementById('collageSelectModeBtn');
+    const collageSelectActions = document.getElementById('collageSelectActions');
+    const collageDeleteSelectedBtn = document.getElementById('collageDeleteSelectedBtn');
+    const collageCancelSelectBtn = document.getElementById('collageCancelSelectBtn');
+    const collageSelectCountBadge = document.getElementById('collageSelectCountBadge');
+
+    document.getElementById('collageImportTrigger').addEventListener('click', (e) => {
+      e.stopPropagation();
+      imgUpload.click();
+    });
+
+    setupDropZone(dropZone, imgUpload, (files) => handleCollageFiles(files));
+    imgUpload.addEventListener('change', (e) => handleCollageFiles(e.target.files));
+
+    // أزرار الحجم ضرب 2 وقسمة 2
+    sizeDecBtn.addEventListener('click', () => {
+      let val = parseInt(imgSizeNum.value) || 128;
+      val = Math.max(16, Math.round(val / 2));
+      imgSizeNum.value = val;
+      generateCollagePreview(1);
+    });
+
+    sizeIncBtn.addEventListener('click', () => {
+      let val = parseInt(imgSizeNum.value) || 128;
+      val = Math.min(4096, Math.round(val * 2));
+      imgSizeNum.value = val;
+      generateCollagePreview(1);
+    });
+
+    imgSizeNum.addEventListener('input', () => generateCollagePreview(1));
+
+    // أزرار الأعمدة +1 و -1
+    colsDecBtn.addEventListener('click', () => {
+      let val = parseInt(columnsNum.value) || 5;
+      val = Math.max(1, val - 1);
+      columnsNum.value = val;
+      generateCollagePreview(1);
+    });
+
+    colsIncBtn.addEventListener('click', () => {
+      let val = parseInt(columnsNum.value) || 5;
+      val = Math.min(30, val + 1);
+      columnsNum.value = val;
+      generateCollagePreview(1);
+    });
+
+    columnsNum.addEventListener('input', () => generateCollagePreview(1));
+
+    imgGapInput.addEventListener('input', (e) => { imgGapVal.textContent = `${e.target.value}px`; generateCollagePreview(1); });
+    strokeWidthInput.addEventListener('input', (e) => { strokeWidthVal.textContent = `${e.target.value}px`; generateCollagePreview(1); });
+    strokeColorInput.addEventListener('input', () => generateCollagePreview(1));
+
+    async function handleCollageFiles(files) {
+      if (!files || files.length === 0) return;
+      const imgFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
+      const promises = imgFiles.map(file => {
+        return new Promise((resolve) => {
+          const url = URL.createObjectURL(file);
+          const img = new Image();
+          img.onload = () => { URL.revokeObjectURL(url); resolve({ img }); };
+          img.onerror = () => { URL.revokeObjectURL(url); resolve(null); };
+          img.src = url;
+        });
+      });
+      const loaded = await Promise.all(promises);
+      images.push(...loaded.filter(Boolean));
+      imgUpload.value = '';
+      updateCollageUIState();
+      generateCollagePreview(1);
+    }
+
+    function updateCollageUIState() {
+      if (images.length > 0) {
+        emptyNotice.style.display = 'none';
+        previewCanvas.style.display = 'block';
+      } else {
+        emptyNotice.style.display = 'flex';
+        previewCanvas.style.display = 'none';
+      }
+      imageCounterNum.textContent = images.length;
+    }
+
+    // دالة ملء الحاوية (Fill Container)
+    function fitCollageCanvasToContainer() {
+      if (!previewCanvas.width || !previewCanvas.height || images.length === 0) return;
+
+      const padding = 36;
+      const availW = Math.max(50, dropZone.clientWidth - padding);
+      const availH = Math.max(50, dropZone.clientHeight - padding);
+
+      const canvasAspect = previewCanvas.width / previewCanvas.height;
+      const containerAspect = availW / availH;
+
+      let displayW, displayH;
+
+      if (canvasAspect > containerAspect) {
+        displayW = availW;
+        displayH = availW / canvasAspect;
+      } else {
+        displayH = availH;
+        displayW = availH * canvasAspect;
+      }
+
+      previewCanvas.style.width = `${Math.round(displayW)}px`;
+      previewCanvas.style.height = `${Math.round(displayH)}px`;
+    }
+
+    const resizeObserver = new ResizeObserver(() => {
+      fitCollageCanvasToContainer();
+    });
+    resizeObserver.observe(dropZone);
+
+    function generateCollagePreview(quality) {
+      if (images.length === 0) {
+        previewCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+        return;
+      }
+
+      const baseSize = parseInt(imgSizeNum.value) || 128;
+      const userColumns = parseInt(columnsNum.value) || 5;
+      const columns = Math.min(images.length, userColumns) || 1;
+
+      const gap = parseInt(imgGapInput.value) || 0;
+      const strokeWidth = parseInt(strokeWidthInput.value) || 0;
+      const strokeColor = strokeColorInput.value || '#FF3B5C';
+
+      const cellWidth = baseSize * quality;
+      const cellHeights = images.map(item => (cellWidth / item.img.width) * item.img.height);
+      const groups = Array.from({ length: columns }, () => 0);
+      const positions = Array.from({ length: images.length }, () => 0);
+
+      const effGap = gap * quality;
+      const effStroke = strokeWidth * quality;
+
+      for (let i = 0; i < images.length; i++) {
+        const imageHeight = cellHeights[i];
+        const groupIndex = i % columns; 
+        const x = groupIndex * (cellWidth + effGap) + effStroke / 2;
+        const y = groups[groupIndex] + effStroke / 2;
+        positions[i] = { x, y, w: cellWidth, h: imageHeight };
+        groups[groupIndex] += imageHeight + effGap;
+      }
+
+      collagePositions = positions;
+      const maxHeight = Math.max(...groups) - effGap + effStroke;
+      const totalWidth = columns * (cellWidth + effGap) - effGap + effStroke;
+      
+      previewCanvas.width = Math.max(10, totalWidth);
+      previewCanvas.height = Math.max(10, maxHeight);
+
+      previewCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+      previewCtx.fillStyle = "#FFFFFF";
+      previewCtx.fillRect(0, 0, previewCanvas.width, previewCanvas.height);
+
+      images.forEach((imageObj, index) => {
+        const pos = positions[index];
+        previewCtx.drawImage(imageObj.img, pos.x, pos.y, pos.w, pos.h);
+        
+        if (strokeWidth > 0) {
+          previewCtx.lineWidth = effStroke;
+          previewCtx.strokeStyle = strokeColor;
+          previewCtx.strokeRect(pos.x, pos.y, pos.w, pos.h);
+        }
+
+        if (isCollageSelectMode && selectedCollageIndices.has(index)) {
+          previewCtx.fillStyle = 'rgba(255, 59, 92, 0.4)';
+          previewCtx.fillRect(pos.x, pos.y, pos.w, pos.h);
+          previewCtx.strokeStyle = '#FF3B5C';
+          previewCtx.lineWidth = 3;
+          previewCtx.strokeRect(pos.x, pos.y, pos.w, pos.h);
+        }
+      });
+
+      fitCollageCanvasToContainer();
+    }
+
+    previewCanvas.addEventListener('click', (e) => {
+      if (!isCollageSelectMode || images.length === 0) return;
+      e.stopPropagation();
+
+      const rect = previewCanvas.getBoundingClientRect();
+      const scaleX = previewCanvas.width / rect.width;
+      const scaleY = previewCanvas.height / rect.height;
+      const clickX = (e.clientX - rect.left) * scaleX;
+      const clickY = (e.clientY - rect.top) * scaleY;
+
+      for (let i = 0; i < collagePositions.length; i++) {
+        const pos = collagePositions[i];
+        if (clickX >= pos.x && clickX <= pos.x + pos.w && clickY >= pos.y && clickY <= pos.y + pos.h) {
+          if (selectedCollageIndices.has(i)) selectedCollageIndices.delete(i);
+          else selectedCollageIndices.add(i);
+          break;
+        }
+      }
+      collageSelectCountBadge.textContent = `${selectedCollageIndices.size} صور`;
+      generateCollagePreview(1);
+    });
+
+    collageSelectModeBtn.addEventListener('click', () => {
+      if (images.length === 0) return;
+      isCollageSelectMode = true;
+      selectedCollageIndices.clear();
+      collageSelectModeBtn.style.display = 'none';
+      collageSelectActions.style.display = 'flex';
+      previewCanvas.classList.add('selecting');
+      collageSelectCountBadge.textContent = `0 صور`;
+      generateCollagePreview(1);
+    });
+
+    collageCancelSelectBtn.addEventListener('click', exitCollageSelectMode);
+
+    collageDeleteSelectedBtn.addEventListener('click', () => {
+      if (selectedCollageIndices.size > 0) {
+        images = images.filter((_, idx) => !selectedCollageIndices.has(idx));
+      }
+      exitCollageSelectMode();
+      updateCollageUIState();
+      generateCollagePreview(1);
+    });
+
+    function exitCollageSelectMode() {
+      isCollageSelectMode = false;
+      selectedCollageIndices.clear();
+      collageSelectModeBtn.style.display = 'flex';
+      collageSelectActions.style.display = 'none';
+      previewCanvas.classList.remove('selecting');
+      generateCollagePreview(1);
+    }
+
+    document.getElementById('clearBtn').addEventListener('click', () => {
+      images = [];
+      imgUpload.value = '';
+      exitCollageSelectMode();
+      updateCollageUIState();
+      generateCollagePreview(1);
+    });
+
+    document.getElementById('exportPNGBtn').addEventListener('click', () => {
+      if (images.length === 0) return;
+      generateCollagePreview(1);
+      const a = document.createElement('a');
+      a.href = previewCanvas.toDataURL('image/png');
+      a.download = 'collage.png';
+      a.click();
+    });
+
+    document.getElementById('exportPDFBtn').addEventListener('click', () => {
+      if (images.length === 0 || !window.jspdf) return;
+      const { jsPDF } = window.jspdf;
+      generateCollagePreview(1);
+      const isLandscape = previewCanvas.width > previewCanvas.height;
+      const pdf = new jsPDF(isLandscape ? 'l' : 'p', 'px', [previewCanvas.width, previewCanvas.height]);
+      pdf.addImage(previewCanvas.toDataURL('image/png'), 'PNG', 0, 0, previewCanvas.width, previewCanvas.height);
+      pdf.save('collage.pdf');
+    });
+
+    // ==========================================
+    // 3. استوديو السبرايت (Sprite Studio)
+    // ==========================================
+    let spriteImage = null;
+    let slicedFrames = [];
+    let framePivots = [];
+    let isPlaying = false;
+    let currentFrameIndex = 0;
+    let animInterval = null;
+
+    let isEditMode = false;
+    let selectedFrameIndex = null;
+    let backupFrames = [];
+
+    let isSpriteDeleteMode = false;
+    let selectedSpriteDeleteFrames = new Set();
+
+    const spriteUpload = document.getElementById('spriteUpload');
+    const spriteDropZone = document.getElementById('spriteDropZone');
+    const spriteCanvas = document.getElementById('spriteCanvas');
+    const spriteCtx = spriteCanvas.getContext('2d');
+    const spriteCanvasWrapper = document.getElementById('spriteCanvasWrapper');
+    const spriteColsInput = document.getElementById('spriteCols');
+    const spriteColsVal = document.getElementById('spriteColsVal');
+    const spriteRowsInput = document.getElementById('spriteRows');
+    const spriteRowsVal = document.getElementById('spriteRowsVal');
+    const fpsInput = document.getElementById('fpsInput');
+    const fpsVal = document.getElementById('fpsVal');
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const playIcon = document.getElementById('playIcon');
+    const animCanvas = document.getElementById('animCanvas');
+    const animCtx = animCanvas.getContext('2d');
+
+    const editSpriteOrderBtn = document.getElementById('editSpriteOrderBtn');
+    const editModeActions = document.getElementById('editModeActions');
+    const confirmSpriteOrderBtn = document.getElementById('confirmSpriteOrderBtn');
+    const cancelSpriteOrderBtn = document.getElementById('cancelSpriteOrderBtn');
+
+    const spriteSelectDeleteBtn = document.getElementById('spriteSelectDeleteBtn');
+    const spriteDeleteActions = document.getElementById('spriteDeleteActions');
+    const confirmSpriteDeleteBtn = document.getElementById('confirmSpriteDeleteBtn');
+    const cancelSpriteDeleteBtn = document.getElementById('cancelSpriteDeleteBtn');
+    const spriteDeleteCountBadge = document.getElementById('spriteDeleteCountBadge');
+
+    document.getElementById('spriteImportTrigger').addEventListener('click', (e) => {
+      e.stopPropagation();
+      spriteUpload.click();
+    });
+    
+    setupDropZone(spriteDropZone, spriteUpload, (files) => loadSpriteFile(files[0]));
+    spriteUpload.addEventListener('change', (e) => loadSpriteFile(e.target.files[0]));
+
+    function loadSpriteFile(file) {
+      if (!file || !file.type.startsWith('image/')) return;
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        spriteImage = img;
+        
+        document.getElementById('spriteEmptyNotice').style.display = 'none';
+        spriteCanvasWrapper.style.display = 'flex';
+        spriteCanvas.style.display = 'block';
+        animCanvas.style.display = 'block';
+
+        ['playPauseBtn', 'openPivotEditorBtn', 'exportSpriteMp4Btn', 'exportSpriteGifBtn', 
+         'exportZipBtn', 'transferToCollageBtn', 'editSpriteOrderBtn', 'spriteSelectDeleteBtn'].forEach(id => {
+          document.getElementById(id).disabled = false;
+        });
+
+        exitEditMode(false);
+        exitSpriteDeleteMode();
+        updateSpriteGrid();
+      };
+      img.src = url;
+    }
+
+    spriteColsInput.addEventListener('input', (e) => {
+      spriteColsVal.textContent = e.target.value;
+      exitEditMode(false);
+      exitSpriteDeleteMode();
+      updateSpriteGrid();
+    });
+
+    spriteRowsInput.addEventListener('input', (e) => {
+      spriteRowsVal.textContent = e.target.value;
+      exitEditMode(false);
+      exitSpriteDeleteMode();
+      updateSpriteGrid();
+    });
+
+    fpsInput.addEventListener('input', (e) => {
+      fpsVal.textContent = e.target.value;
+      if (isPlaying) { stopAnimation(); startAnimation(); }
+    });
+
+    playPauseBtn.addEventListener('click', () => {
+      if (isPlaying) stopAnimation();
+      else startAnimation();
+    });
+
+    function updateSpriteGrid() {
+      if (!spriteImage) return;
+      const cols = parseInt(spriteColsInput.value) || 1;
+      const rows = parseInt(spriteRowsInput.value) || 1;
+      document.getElementById('totalFramesBadge').textContent = `إجمالي الإطارات: ${cols * rows}`;
+
+      const cellWidth = spriteImage.width / cols;
+      const cellHeight = spriteImage.height / rows;
+
+      slicedFrames = [];
+      framePivots = [];
+
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const fCanvas = document.createElement('canvas');
+          fCanvas.width = cellWidth;
+          fCanvas.height = cellHeight;
+          const fCtx = fCanvas.getContext('2d');
+          fCtx.drawImage(spriteImage, c * cellWidth, r * cellHeight, cellWidth, cellHeight, 0, 0, cellWidth, cellHeight);
+          slicedFrames.push(fCanvas);
+          framePivots.push({ x: 0.5, y: 0.5 });
+        }
+      }
+
+      currentFrameIndex = 0;
+      renderSpriteCanvas();
+      drawAnimFrame();
+    }
+
+    function renderSpriteCanvas() {
+      if (!spriteImage || slicedFrames.length === 0) return;
+      const cols = parseInt(spriteColsInput.value) || 1;
+      const rows = parseInt(spriteRowsInput.value) || 1;
+      spriteCanvas.width = spriteImage.width;
+      spriteCanvas.height = spriteImage.height;
+
+      const cellWidth = spriteCanvas.width / cols;
+      const cellHeight = spriteCanvas.height / rows;
+
+      spriteCtx.clearRect(0, 0, spriteCanvas.width, spriteCanvas.height);
+
+      for (let i = 0; i < slicedFrames.length; i++) {
+        const r = Math.floor(i / cols);
+        const c = i % cols;
+        if (slicedFrames[i]) {
+          spriteCtx.drawImage(slicedFrames[i], c * cellWidth, r * cellHeight, cellWidth, cellHeight);
+        }
+
+        if (isEditMode) {
+          spriteCtx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+          spriteCtx.fillRect(c * cellWidth + 6, r * cellHeight + 6, 26, 20);
+          spriteCtx.fillStyle = '#FFFFFF';
+          spriteCtx.font = 'bold 12px sans-serif';
+          spriteCtx.textAlign = 'center';
+          spriteCtx.textBaseline = 'middle';
+          spriteCtx.fillText(i + 1, c * cellWidth + 19, r * cellHeight + 16);
+        }
+
+        if (isSpriteDeleteMode && selectedSpriteDeleteFrames.has(i)) {
+          spriteCtx.fillStyle = 'rgba(255, 59, 92, 0.45)';
+          spriteCtx.fillRect(c * cellWidth, r * cellHeight, cellWidth, cellHeight);
+          spriteCtx.strokeStyle = '#FF3B5C';
+          spriteCtx.lineWidth = 3;
+          spriteCtx.strokeRect(c * cellWidth, r * cellHeight, cellWidth, cellHeight);
+        }
+      }
+
+      spriteCtx.strokeStyle = '#FF3B5C';
+      spriteCtx.lineWidth = 1.5;
+      for (let c = 1; c < cols; c++) {
+        spriteCtx.beginPath();
+        spriteCtx.moveTo(c * cellWidth, 0);
+        spriteCtx.lineTo(c * cellWidth, spriteCanvas.height);
+        spriteCtx.stroke();
+      }
+      for (let r = 1; r < rows; r++) {
+        spriteCtx.beginPath();
+        spriteCtx.moveTo(0, r * cellHeight);
+        spriteCtx.lineTo(spriteCanvas.width, r * cellHeight);
+        spriteCtx.stroke();
+      }
+
+      if (isEditMode && selectedFrameIndex !== null) {
+        const r = Math.floor(selectedFrameIndex / cols);
+        const c = selectedFrameIndex % cols;
+        spriteCtx.fillStyle = 'rgba(0, 200, 83, 0.35)';
+        spriteCtx.fillRect(c * cellWidth, r * cellHeight, cellWidth, cellHeight);
+        spriteCtx.strokeStyle = '#00E676';
+        spriteCtx.lineWidth = 3;
+        spriteCtx.strokeRect(c * cellWidth, r * cellHeight, cellWidth, cellHeight);
+      }
+    }
+
+    spriteCanvas.addEventListener('click', (e) => {
+      if ((!isEditMode && !isSpriteDeleteMode) || slicedFrames.length === 0) return;
+      e.stopPropagation();
+
+      const rect = spriteCanvas.getBoundingClientRect();
+      const scaleX = spriteCanvas.width / rect.width;
+      const scaleY = spriteCanvas.height / rect.height;
+      const x = (e.clientX - rect.left) * scaleX;
+      const y = (e.clientY - rect.top) * scaleY;
+
+      const cols = parseInt(spriteColsInput.value) || 1;
+      const rows = parseInt(spriteRowsInput.value) || 1;
+      const cellWidth = spriteCanvas.width / cols;
+      const cellHeight = spriteCanvas.height / rows;
+
+      const col = Math.floor(x / cellWidth);
+      const row = Math.floor(y / cellHeight);
+
+      if (col < 0 || col >= cols || row < 0 || row >= rows) return;
+      const clickedIdx = row * cols + col;
+      if (clickedIdx >= slicedFrames.length) return;
+
+      if (isSpriteDeleteMode) {
+        if (selectedSpriteDeleteFrames.has(clickedIdx)) selectedSpriteDeleteFrames.delete(clickedIdx);
+        else selectedSpriteDeleteFrames.add(clickedIdx);
+        spriteDeleteCountBadge.textContent = `تم تحديد ${selectedSpriteDeleteFrames.size} فريم`;
+      } else if (isEditMode) {
+        if (selectedFrameIndex === null) {
+          selectedFrameIndex = clickedIdx;
+        } else if (selectedFrameIndex === clickedIdx) {
+          selectedFrameIndex = null;
+        } else {
+          const tmpFrame = slicedFrames[selectedFrameIndex];
+          slicedFrames[selectedFrameIndex] = slicedFrames[clickedIdx];
+          slicedFrames[clickedIdx] = tmpFrame;
+
+          const tmpPivot = framePivots[selectedFrameIndex];
+          framePivots[selectedFrameIndex] = framePivots[clickedIdx];
+          framePivots[clickedIdx] = tmpPivot;
+
+          selectedFrameIndex = null;
+        }
+      }
+
+      renderSpriteCanvas();
+      drawAnimFrame();
+    });
+
+    editSpriteOrderBtn.addEventListener('click', () => {
+      if (slicedFrames.length === 0) return;
+      if (isPlaying) stopAnimation();
+      exitSpriteDeleteMode();
+
+      isEditMode = true;
+      backupFrames = [...slicedFrames];
+      selectedFrameIndex = null;
+      editSpriteOrderBtn.style.display = 'none';
+      editModeActions.style.display = 'flex';
+      spriteCanvasWrapper.classList.add('editing');
+      renderSpriteCanvas();
+    });
+
+    confirmSpriteOrderBtn.addEventListener('click', () => exitEditMode(true));
+    cancelSpriteOrderBtn.addEventListener('click', () => {
+      if (backupFrames.length > 0) slicedFrames = [...backupFrames];
+      exitEditMode(false);
+    });
+
+    function exitEditMode(save) {
+      isEditMode = false;
+      selectedFrameIndex = null;
+      backupFrames = [];
+      editSpriteOrderBtn.style.display = 'flex';
+      editModeActions.style.display = 'none';
+      spriteCanvasWrapper.classList.remove('editing');
+      renderSpriteCanvas();
+      drawAnimFrame();
+    }
+
+    spriteSelectDeleteBtn.addEventListener('click', () => {
+      if (slicedFrames.length === 0) return;
+      if (isPlaying) stopAnimation();
+      exitEditMode(false);
+
+      isSpriteDeleteMode = true;
+      selectedSpriteDeleteFrames.clear();
+      spriteSelectDeleteBtn.style.display = 'none';
+      spriteDeleteActions.style.display = 'flex';
+      spriteCanvasWrapper.classList.add('deleting');
+      spriteDeleteCountBadge.textContent = `تم تحديد 0 فريم`;
+      renderSpriteCanvas();
+    });
+
+    cancelSpriteDeleteBtn.addEventListener('click', exitSpriteDeleteMode);
+    confirmSpriteDeleteBtn.addEventListener('click', () => {
+      if (selectedSpriteDeleteFrames.size > 0) {
+        slicedFrames = slicedFrames.filter((_, idx) => !selectedSpriteDeleteFrames.has(idx));
+        framePivots = framePivots.filter((_, idx) => !selectedSpriteDeleteFrames.has(idx));
+        document.getElementById('totalFramesBadge').textContent = `إجمالي الإطارات: ${slicedFrames.length}`;
+        currentFrameIndex = 0;
+      }
+      exitSpriteDeleteMode();
+      renderSpriteCanvas();
+      drawAnimFrame();
+    });
+
+    function exitSpriteDeleteMode() {
+      isSpriteDeleteMode = false;
+      selectedSpriteDeleteFrames.clear();
+      spriteSelectDeleteBtn.style.display = 'flex';
+      spriteDeleteActions.style.display = 'none';
+      spriteCanvasWrapper.classList.remove('deleting');
+      renderSpriteCanvas();
+    }
+
+    function drawAnimFrame() {
+      if (slicedFrames.length === 0) return;
+      const frame = slicedFrames[currentFrameIndex % slicedFrames.length];
+      animCanvas.width = frame.width;
+      animCanvas.height = frame.height;
+      animCtx.clearRect(0, 0, animCanvas.width, animCanvas.height);
+      animCtx.imageSmoothingEnabled = false;
+      animCtx.drawImage(frame, 0, 0);
+    }
+
+    function startAnimation() {
+      if (slicedFrames.length === 0) return;
+      isPlaying = true;
+      playIcon.textContent = '❚❚ إيقاف';
+      const fps = parseInt(fpsInput.value) || 12;
+      animInterval = setInterval(() => {
+        currentFrameIndex = (currentFrameIndex + 1) % slicedFrames.length;
+        drawAnimFrame();
+      }, 1000 / fps);
+    }
+
+    function stopAnimation() {
+      isPlaying = false;
+      playIcon.textContent = '► تشغيل';
+      if (animInterval) clearInterval(animInterval);
+    }
+
+    document.getElementById('exportSpriteGifBtn').addEventListener('click', () => {
+      if (slicedFrames.length === 0 || !window.gifshot) return;
+      showProgress('جاري إنشاء ملف الـ GIF...');
+      const imagesBase64 = slicedFrames.map(f => f.toDataURL('image/png'));
+      const fps = parseInt(fpsInput.value) || 12;
+
+      window.gifshot.createGIF({
+        images: imagesBase64,
+        gifWidth: Math.min(slicedFrames[0].width, 600),
+        gifHeight: Math.min(slicedFrames[0].height, (slicedFrames[0].height * (600 / slicedFrames[0].width))),
+        interval: 1 / fps,
+        numWorkers: 4
+      }, function (obj) {
+        if (!obj.error) {
+          const a = document.createElement('a');
+          a.href = obj.image;
+          a.download = 'sprite_animation.gif';
+          a.click();
+        } else {
+          alert('حدث خطأ أثناء تصدير الـ GIF');
+        }
+        hideProgress();
+      });
+    });
+
+    document.getElementById('exportSpriteMp4Btn').addEventListener('click', async () => {
+      if (slicedFrames.length === 0) return;
+      showProgress('جاري تصدير الفيديو...');
+      const fps = parseInt(fpsInput.value) || 12;
+
+      const recCanvas = document.createElement('canvas');
+      recCanvas.width = slicedFrames[0].width;
+      recCanvas.height = slicedFrames[0].height;
+      const recCtx = recCanvas.getContext('2d');
+
+      const stream = recCanvas.captureStream(fps);
+      let mimeType = MediaRecorder.isTypeSupported('video/mp4') ? 'video/mp4' : 'video/webm';
+      let recorder = new MediaRecorder(stream, { mimeType });
+      const chunks = [];
+
+      recorder.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
+      recorder.start();
+
+      for (let i = 0; i < slicedFrames.length; i++) {
+        recCtx.clearRect(0, 0, recCanvas.width, recCanvas.height);
+        recCtx.drawImage(slicedFrames[i], 0, 0);
+        updateProgress(Math.round(((i + 1) / slicedFrames.length) * 100));
+        await new Promise(r => setTimeout(r, 1000 / fps));
+      }
+
+      recorder.stop();
+      await new Promise(r => recorder.onstop = r);
+
+      const blob = new Blob(chunks, { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = mimeType === 'video/mp4' ? 'sprite_animation.mp4' : 'sprite_animation.webm';
+      a.click();
+      URL.revokeObjectURL(url);
+      hideProgress();
+    });
+
+    document.getElementById('exportZipBtn').addEventListener('click', async () => {
+      if (slicedFrames.length === 0 || !window.JSZip) return;
+      showProgress('جاري تجميع وضغط الإطارات...');
+      const zip = new JSZip();
+      const folder = zip.folder("sprite_frames");
+
+      for (let i = 0; i < slicedFrames.length; i++) {
+        const blob = await new Promise(r => slicedFrames[i].toBlob(r, 'image/png'));
+        folder.file(`frame_${String(i + 1).padStart(3, '0')}.png`, blob);
+        updateProgress(Math.round(((i + 1) / slicedFrames.length) * 60));
+      }
+
+      const content = await zip.generateAsync({ type: "blob" }, (meta) => {
+        updateProgress(60 + Math.round(meta.percent * 0.4));
+      });
+
+      const a = document.createElement('a');
+      const url = URL.createObjectURL(content);
+      a.href = url;
+      a.download = 'sprite_frames.zip';
+      a.click();
+      URL.revokeObjectURL(url);
+      hideProgress();
+    });
+
+    document.getElementById('transferToCollageBtn').addEventListener('click', async () => {
+      if (slicedFrames.length === 0) return;
+      const loaded = await Promise.all(slicedFrames.map(fCanvas => {
+        return new Promise((resolve) => {
+          const img = new Image();
+          img.onload = () => resolve({ img });
+          img.src = fCanvas.toDataURL();
+        });
+      }));
+      images.push(...loaded);
+      updateCollageUIState();
+      generateCollagePreview(1);
+      switchTab(tabCollageBtn, collageView);
+    });
+
+    // ==========================================
+    // 4. محرك محرر البيفوت (Pivot Editor)
+    // ==========================================
+    let activePivotFrameIdx = 0;
+    let onionSkinActive = true;
+    let isDraggingPivot = false;
+    let backupPivots = [];
+    let zoomScale = 1;
+
+    const pivotEditorModal = document.getElementById('pivotEditorModal');
+    const pivotCanvas = document.getElementById('pivotCanvas');
+    const pivotCtx = pivotCanvas.getContext('2d');
+    const pivotFramesGrid = document.getElementById('pivotFramesGrid');
+    const pivotContainer = document.getElementById('pivotCanvasContainer');
+
+    const pivotXInput = document.getElementById('pivotXInput');
+    const pivotYInput = document.getElementById('pivotYInput');
+    const toggleOnionSkinBtn = document.getElementById('toggleOnionSkinBtn');
+    const openPivotPresetsBtn = document.getElementById('openPivotPresetsBtn');
+    const pivotPresetsPopup = document.getElementById('pivotPresetsPopup');
+    const savePivotBtn = document.getElementById('savePivotBtn');
+    const cancelPivotBtn = document.getElementById('cancelPivotBtn');
+    const resetPivotZoomBtn = document.getElementById('resetPivotZoomBtn');
+    const exportPivotJsonBtn = document.getElementById('exportPivotJsonBtn');
+
+    document.getElementById('openPivotEditorBtn').addEventListener('click', () => {
+      if (slicedFrames.length === 0) return;
+      if (isPlaying) stopAnimation();
+
+      backupPivots = framePivots.map(p => ({ ...p }));
+      activePivotFrameIdx = 0;
+      zoomScale = 1;
+
+      pivotEditorModal.classList.add('active');
+      buildPivotFramesGrid();
+      renderPivotCanvas();
+      updatePivotInputsUI();
+    });
+
+    pivotContainer.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const zoomFactor = e.deltaY < 0 ? 1.15 : 0.85;
+      zoomScale = Math.min(Math.max(0.5, zoomScale * zoomFactor), 15);
+      pivotCanvas.style.transform = `scale(${zoomScale})`;
+    }, { passive: false });
+
+    resetPivotZoomBtn.addEventListener('click', () => {
+      zoomScale = 1;
+      pivotCanvas.style.transform = `scale(1)`;
+    });
+
+    function buildPivotFramesGrid() {
+      pivotFramesGrid.innerHTML = '';
+      slicedFrames.forEach((fCanvas, idx) => {
+        const card = document.createElement('div');
+        card.className = `pivot-frame-thumb-card ${idx === activePivotFrameIdx ? 'active-thumb' : ''}`;
+        
+        const mini = document.createElement('canvas');
+        mini.width = fCanvas.width;
+        mini.height = fCanvas.height;
+        mini.getContext('2d').drawImage(fCanvas, 0, 0);
+
+        const num = document.createElement('span');
+        num.className = 'thumb-number';
+        num.textContent = idx + 1;
+
+        card.appendChild(mini);
+        card.appendChild(num);
+
+        card.onclick = () => {
+          activePivotFrameIdx = idx;
+          document.querySelectorAll('.pivot-frame-thumb-card').forEach(c => c.classList.remove('active-thumb'));
+          card.classList.add('active-thumb');
+          updatePivotInputsUI();
+          renderPivotCanvas();
+        };
+
+        pivotFramesGrid.appendChild(card);
+      });
+    }
+
+    function updatePivotInputsUI() {
+      const p = framePivots[activePivotFrameIdx] || { x: 0.5, y: 0.5 };
+      pivotXInput.value = p.x.toFixed(2);
+      pivotYInput.value = p.y.toFixed(2);
+
+      document.querySelectorAll('.preset-dot').forEach(dot => {
+        const dx = parseFloat(dot.dataset.x);
+        const dy = parseFloat(dot.dataset.y);
+        if (Math.abs(dx - p.x) < 0.05 && Math.abs(dy - p.y) < 0.05) dot.classList.add('active');
+        else dot.classList.remove('active');
+      });
+    }
+
+    function renderPivotCanvas() {
+      if (slicedFrames.length === 0) return;
+      const currentFrame = slicedFrames[activePivotFrameIdx];
+      pivotCanvas.width = currentFrame.width;
+      pivotCanvas.height = currentFrame.height;
+
+      pivotCtx.clearRect(0, 0, pivotCanvas.width, pivotCanvas.height);
+      pivotCtx.imageSmoothingEnabled = false;
+
+      if (onionSkinActive && slicedFrames.length > 1) {
+        const prevIdx = (activePivotFrameIdx - 1 + slicedFrames.length) % slicedFrames.length;
+        drawTintedFrame(pivotCtx, slicedFrames[prevIdx], '#FF4D6D', 0.4);
+        const nextIdx = (activePivotFrameIdx + 1) % slicedFrames.length;
+        drawTintedFrame(pivotCtx, slicedFrames[nextIdx], '#38B6FF', 0.4);
+      }
+
+      pivotCtx.drawImage(currentFrame, 0, 0);
+
+      const p = framePivots[activePivotFrameIdx] || { x: 0.5, y: 0.5 };
+      const px = p.x * pivotCanvas.width;
+      const py = p.y * pivotCanvas.height;
+
+      pivotCtx.beginPath();
+      pivotCtx.arc(px, py, 6, 0, Math.PI * 2);
+      pivotCtx.fillStyle = '#FF3B5C';
+      pivotCtx.fill();
+      pivotCtx.lineWidth = 2;
+      pivotCtx.strokeStyle = '#FFFFFF';
+      pivotCtx.stroke();
+    }
+
+    function drawTintedFrame(targetCtx, srcCanvas, color, alpha) {
+      const off = document.createElement('canvas');
+      off.width = srcCanvas.width;
+      off.height = srcCanvas.height;
+      const oCtx = off.getContext('2d');
+      oCtx.drawImage(srcCanvas, 0, 0);
+      oCtx.globalCompositeOperation = 'source-in';
+      oCtx.fillStyle = color;
+      oCtx.fillRect(0, 0, off.width, off.height);
+
+      targetCtx.save();
+      targetCtx.globalAlpha = alpha;
+      targetCtx.drawImage(off, 0, 0);
+      targetCtx.restore();
+    }
+
+    function handlePivotPointer(e) {
+      const rect = pivotCanvas.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width;
+      const y = (e.clientY - rect.top) / rect.height;
+
+      framePivots[activePivotFrameIdx] = {
+        x: Math.max(0, Math.min(1, x)),
+        y: Math.max(0, Math.min(1, y))
+      };
+
+      updatePivotInputsUI();
+      renderPivotCanvas();
+    }
+
+    pivotCanvas.addEventListener('pointerdown', (e) => {
+      isDraggingPivot = true;
+      handlePivotPointer(e);
+    });
+
+    window.addEventListener('pointermove', (e) => {
+      if (isDraggingPivot) handlePivotPointer(e);
+    });
+
+    window.addEventListener('pointerup', () => { isDraggingPivot = false; });
+
+    pivotXInput.addEventListener('input', (e) => {
+      const val = parseFloat(e.target.value) || 0;
+      framePivots[activePivotFrameIdx].x = Math.max(0, Math.min(1, val));
+      renderPivotCanvas();
+    });
+
+    pivotYInput.addEventListener('input', (e) => {
+      const val = parseFloat(e.target.value) || 0;
+      framePivots[activePivotFrameIdx].y = Math.max(0, Math.min(1, val));
+      renderPivotCanvas();
+    });
+
+    toggleOnionSkinBtn.addEventListener('click', () => {
+      onionSkinActive = !onionSkinActive;
+      toggleOnionSkinBtn.classList.toggle('active-onion', onionSkinActive);
+      renderPivotCanvas();
+    });
+
+    openPivotPresetsBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isHidden = pivotPresetsPopup.style.display === 'none';
+      pivotPresetsPopup.style.display = isHidden ? 'flex' : 'none';
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!pivotPresetsPopup.contains(e.target) && e.target !== openPivotPresetsBtn) {
+        pivotPresetsPopup.style.display = 'none';
+      }
+    });
+
+    document.querySelectorAll('.preset-dot').forEach(dot => {
+      dot.addEventListener('click', () => {
+        framePivots[activePivotFrameIdx] = {
+          x: parseFloat(dot.dataset.x),
+          y: parseFloat(dot.dataset.y)
+        };
+        updatePivotInputsUI();
+        renderPivotCanvas();
+        pivotPresetsPopup.style.display = 'none';
+      });
+    });
+
+    savePivotBtn.addEventListener('click', () => {
+      pivotEditorModal.classList.remove('active');
+    });
+
+    cancelPivotBtn.addEventListener('click', () => {
+      if (backupPivots.length > 0) {
+        framePivots = backupPivots.map(p => ({ ...p }));
+      }
+      pivotEditorModal.classList.remove('active');
+    });
+
+    exportPivotJsonBtn.addEventListener('click', () => {
+      if (slicedFrames.length === 0) return;
+      const exportData = {
+        meta: {
+          app: "Media & Sprite Studio",
+          frameCount: slicedFrames.length,
+          frameWidth: slicedFrames[0].width,
+          frameHeight: slicedFrames[0].height
+        },
+        frames: framePivots.map((pivot, idx) => ({
+          index: idx + 1,
+          pivot: { x: parseFloat(pivot.x.toFixed(3)), y: parseFloat(pivot.y.toFixed(3)) },
+          pixelPivot: {
+            x: Math.round(pivot.x * slicedFrames[0].width),
+            y: Math.round(pivot.y * slicedFrames[0].height)
+          }
+        }))
+      };
+
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'sprite_pivots.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    // ==========================================
+    // 5. استخراج الفريمات من الفيديو
+    // ==========================================
+    const videoUpload = document.getElementById('videoUpload');
+    const videoDropZone = document.getElementById('videoDropZone');
+    const mainVideoPlayer = document.getElementById('mainVideoPlayer');
+    const vidDurationBadge = document.getElementById('vidDurationBadge');
+    const vidResBadge = document.getElementById('vidResBadge');
+    const vidEstFramesBadge = document.getElementById('vidEstFramesBadge');
+
+    const videoFpsInput = document.getElementById('videoFpsInput');
+    const videoFpsVal = document.getElementById('videoFpsVal');
+    const videoMaxFramesInput = document.getElementById('videoMaxFramesInput');
+    const videoMaxFramesVal = document.getElementById('videoMaxFramesVal');
+
+    let currentVideoFile = null;
+    let currentVideoObjectUrl = null;
+
+    document.getElementById('videoImportTrigger').addEventListener('click', (e) => {
+      e.stopPropagation();
+      videoUpload.click();
+    });
+    
+    setupDropZone(videoDropZone, videoUpload, (files) => loadVideoFile(files[0]));
+    videoUpload.addEventListener('change', (e) => loadVideoFile(e.target.files[0]));
+
+    function loadVideoFile(file) {
+      if (!file || !file.type.startsWith('video/')) return;
+      currentVideoFile = file;
+
+      if (currentVideoObjectUrl) URL.revokeObjectURL(currentVideoObjectUrl);
+      currentVideoObjectUrl = URL.createObjectURL(file);
+      mainVideoPlayer.src = currentVideoObjectUrl;
+
+      mainVideoPlayer.onloadedmetadata = () => {
+        document.getElementById('videoEmptyNotice').style.display = 'none';
+        document.getElementById('videoPlayerWrapper').style.display = 'flex';
+        ['extractGifBtn', 'extractZipBtn', 'transferVidToCollageBtn'].forEach(id => {
+          document.getElementById(id).disabled = false;
+        });
+
+        vidDurationBadge.textContent = `${mainVideoPlayer.duration.toFixed(1)} ثانية`;
+        vidResBadge.textContent = `${mainVideoPlayer.videoWidth}x${mainVideoPlayer.videoHeight}`;
+        updateEstimatedFrames();
+      };
+    }
+
+    function updateEstimatedFrames() {
+      if (!mainVideoPlayer.duration) return;
+      const fps = parseInt(videoFpsInput.value);
+      const max = parseInt(videoMaxFramesInput.value);
+      const est = Math.min(Math.floor(mainVideoPlayer.duration * fps), max);
+      vidEstFramesBadge.textContent = `${est} فريم`;
+    }
+
+    videoFpsInput.addEventListener('input', (e) => {
+      videoFpsVal.textContent = `${e.target.value} FPS`;
+      updateEstimatedFrames();
+    });
+
+    videoMaxFramesInput.addEventListener('input', (e) => {
+      videoMaxFramesVal.textContent = e.target.value;
+      updateEstimatedFrames();
+    });
+
+    async function extractVideoFramesAsync() {
+      if (!currentVideoFile) return [];
+      const fps = parseInt(videoFpsInput.value) || 10;
+      const maxFrames = parseInt(videoMaxFramesInput.value) || 80;
+
+      showProgress('جاري استخراج الفريمات بأعلى دقة...');
+
+      return new Promise((resolve) => {
+        const tempVideo = document.createElement('video');
+        const tempUrl = URL.createObjectURL(currentVideoFile);
+        tempVideo.src = tempUrl;
+        tempVideo.muted = true;
+        tempVideo.playsInline = true;
+
+        tempVideo.onloadedmetadata = async () => {
+          const duration = tempVideo.duration;
+          const interval = 1 / fps;
+          const totalFrames = Math.min(Math.floor(duration * fps), maxFrames);
+
+          const canvas = document.createElement('canvas');
+          canvas.width = tempVideo.videoWidth;
+          canvas.height = tempVideo.videoHeight;
+          const ctx = canvas.getContext('2d');
+
+          const extracted = [];
+          let currentTime = 0;
+
+          for (let i = 0; i < totalFrames; i++) {
+            tempVideo.currentTime = currentTime;
+
+            await new Promise((r) => {
+              let doneOnce = false;
+              const handler = () => { if (!doneOnce) { doneOnce = true; tempVideo.removeEventListener('seeked', handler); r(); } };
+              tempVideo.addEventListener('seeked', handler);
+              setTimeout(handler, 400);
+            });
+
+            ctx.drawImage(tempVideo, 0, 0, canvas.width, canvas.height);
+            const fCanvas = document.createElement('canvas');
+            fCanvas.width = canvas.width;
+            fCanvas.height = canvas.height;
+            fCanvas.getContext('2d').drawImage(canvas, 0, 0);
+            extracted.push(fCanvas);
+
+            currentTime += interval;
+            if (currentTime > duration) break;
+            updateProgress(Math.round(((i + 1) / totalFrames) * 95));
+          }
+
+          URL.revokeObjectURL(tempUrl);
+          resolve(extracted);
+        };
+      });
+    }
+
+    document.getElementById('extractGifBtn').addEventListener('click', async () => {
+      const frames = await extractVideoFramesAsync();
+      if (frames.length === 0 || !window.gifshot) { hideProgress(); return; }
+
+      showProgress('جاري تركيب الـ GIF...');
+      const imagesBase64 = frames.map(f => f.toDataURL('image/png'));
+      const fps = parseInt(videoFpsInput.value) || 10;
+
+      window.gifshot.createGIF({
+        images: imagesBase64,
+        gifWidth: Math.min(frames[0].width, 600),
+        gifHeight: Math.min(frames[0].height, (frames[0].height * (600 / frames[0].width))),
+        interval: 1 / fps,
+        numWorkers: 4
+      }, function (obj) {
+        if (!obj.error) {
+          const a = document.createElement('a');
+          a.href = obj.image;
+          a.download = 'video_frames.gif';
+          a.click();
+        } else {
+          alert('حدث خطأ أثناء تركيب الـ GIF');
+        }
+        hideProgress();
+      });
+    });
+
+    document.getElementById('extractZipBtn').addEventListener('click', async () => {
+      const frames = await extractVideoFramesAsync();
+      if (frames.length === 0 || !window.JSZip) { hideProgress(); return; }
+
+      showProgress('جاري إنشاء أرشيف ZIP...');
+      const zip = new JSZip();
+      const folder = zip.folder("video_frames");
+
+      for (let i = 0; i < frames.length; i++) {
+        const blob = await new Promise(r => frames[i].toBlob(r, 'image/png'));
+        folder.file(`frame_${String(i + 1).padStart(4, '0')}.png`, blob);
+        updateProgress(Math.round(((i + 1) / frames.length) * 70));
+      }
+
+      const content = await zip.generateAsync({ type: "blob" });
+      const a = document.createElement('a');
+      const url = URL.createObjectURL(content);
+      a.href = url;
+      a.download = 'video_frames.zip';
+      a.click();
+      URL.revokeObjectURL(url);
+      hideProgress();
+    });
+
+    document.getElementById('transferVidToCollageBtn').addEventListener('click', async () => {
+      const frames = await extractVideoFramesAsync();
+      if (frames.length === 0) { hideProgress(); return; }
+
+      const loaded = await Promise.all(frames.map(fCanvas => {
+        return new Promise((resolve) => {
+          const img = new Image();
+          img.onload = () => resolve({ img });
+          img.src = fCanvas.toDataURL();
+        });
+      }));
+
+      images.push(...loaded);
+      hideProgress();
+      updateCollageUIState();
+      generateCollagePreview(1);
+      switchTab(tabCollageBtn, collageView);
+    });
+  </script>
 </body>
 </html>
